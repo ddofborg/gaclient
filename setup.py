@@ -20,4 +20,4 @@ setup(name='gaclient',
     ],
     keywords = ('google analytics'),
     packages=['gaclient'],
-    requires=['apiclient (>=1.0)'])
+    install_requires=['google-api-python-client'])
