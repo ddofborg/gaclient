@@ -16,8 +16,8 @@ setup(name='gaclient',
         'License :: OSI Approved :: Apache Software License',
         'Intended Audience :: Developers',
         'Topic :: Internet :: WWW/HTTP',
+        'Operating System :: POSIX'
     ],
-    platform=('Any',),
     keywords = ('google analytics'),
     packages=['gaclient'],
     requires=['apiclient (>=1.0)'])
