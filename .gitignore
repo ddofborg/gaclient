@@ -3,4 +3,6 @@ test.py
 _build
 .coverage
 .ropeproject
-
+MANIFEST
+build/
+dist/
