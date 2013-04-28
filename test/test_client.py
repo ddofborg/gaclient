@@ -47,3 +47,13 @@ class TestGoogleAnalyticsClient (object):
 
     def test_iteration (self):
         ok_(len(list(self.client.download_date_range())) == 18    )
+
+    def test_service_parameter (self):
+        srv = object()
+        srv_func = lambda: srv
+
+        c1 = client.GoogleAnalyticsClient(srv, 'abc123', [], [])
+        ok_(c1.service is srv)
+
+        c2 = client.GoogleAnalyticsClient(srv_func, 'abc123', [], [])
+        ok_(c1.service is srv)
