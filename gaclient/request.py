@@ -65,13 +65,26 @@ class Request (object):
         while results:
 
             for row in results['rows']:
-                row_data = [func(val) for (_, func), val in itertools.izip(headers, row)]
-                yield record_type(*row_data)
+                row_data = {header: func(val) for (header, func), val in\
+                            itertools.izip(headers, row)}
+                yield self._create_record(record_type, row_data)
 
             if not self._auto_advance or not 'nextLink' in results:
                 break
 
             results = self._next_request()
+
+    def _create_record (self, type_, data):
+        ''' Returns an instance of `type_` containing `data`.
+
+        :param type_: A class or namedtuple, typically the return value
+                      of :func:`_create_record_type`.
+        :param data: A dictionary containing a mapping from header name
+                     to data.
+
+        :returns: An instance of `type_`.
+        '''
+        return type_(**data)
 
     def _create_record_type (self, headers):
         ''' Returns a namedtuple class. '''
