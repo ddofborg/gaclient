@@ -17,7 +17,7 @@ from oauth2client.client import OAuth2Credentials
 
 import gaclient
 
-PROFILE = '2521727'
+PROFILE = 'PROFILE_ID'
 CLIENT_ID = 'YOUR_CLIENT_ID'
 CLIENT_SECRET = 'YOUR_CLIENT_SECRENT'
 

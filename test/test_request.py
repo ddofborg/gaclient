@@ -82,18 +82,21 @@ class TestParseHeader (object):
             {'dataType': 'STRING', 'name': 'ga:date'},
             {'dataType': 'STRING', 'name': 'ga:keyword'},
             {'dataType': 'INTEGER', 'name': 'ga:visits'},
+            {'dataType': 'CURRENCY', 'name': "ga:transactionRevenue"},
         ]
 
         parsed_headers = self.request._parse_headers(column_headers)
         ok_(('keyword', unicode) in parsed_headers)
         ok_(('date', self.request._parse_date) in parsed_headers)
         ok_(('visits', int) in parsed_headers)
+        ok_(('transactionRevenue', float) in parsed_headers)
 
     def test_create_record_type (self):
         column_headers = [
             {'dataType': 'STRING', 'name': 'ga:date'},
             {'dataType': 'STRING', 'name': 'ga:keyword'},
             {'dataType': 'INTEGER', 'name': 'ga:visits'},
+            {'dataType': 'CURRENCY', 'name': "ga:transactionRevenue"}
         ]
 
         parsed_headers = self.request._parse_headers(column_headers)
@@ -102,6 +105,7 @@ class TestParseHeader (object):
         ok_(hasattr(rtype, 'keyword'))
         ok_(hasattr(rtype, 'date'))
         ok_(hasattr(rtype, 'visits'))
+        ok_(hasattr(rtype, 'transactionRevenue'))
 
     @raises(TypeError)
     def test_unknown_type (self):
