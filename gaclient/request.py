@@ -92,6 +92,9 @@ class Request (object):
             if data_type == 'INTEGER':
                 headers.append((header_name, int))
 
+            elif data_type == 'CURRENCY' or data_type == 'DOUBLE':
+                headers.append((header_name, float))
+
             elif data_type == 'STRING':
                 if header_name == 'date':
                     headers.append((header_name, self._parse_date))
