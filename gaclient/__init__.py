@@ -2,7 +2,7 @@
     A client for google analytics.
 '''
 
-__version__ = '0.2'
+__version__ = '0.2.1'
 
 import logging
 
