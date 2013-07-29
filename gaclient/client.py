@@ -90,7 +90,7 @@ class GoogleAnalyticsClient (object):
             if current_end_date > end_date:
                 current_end_date = end_date
 
-            requests.append(Request(self.service, self.profile,
+            requests.append(self._request_type(self.service, self.profile,
                 current_start_date, current_end_date, self.dimensions,
                 self.metrics, self.filters, sort, limit, auto_advance))
 
