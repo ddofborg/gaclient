@@ -2,18 +2,22 @@
     A client for google analytics.
 '''
 
-__version__ = '0.2.1'
+__version__ = '0.3'
 
 import logging
 
 from . import client
 from . import request
+from . import util
+
 from .client import GoogleAnalyticsClient
 from .request import Request
 
 __all__ = [
     'client',
     'request',
+    'util',
+    
     'GoogleAnalyticsClient',
     'Request',
 ]
