@@ -7,7 +7,7 @@ user, retrieving metrics is as simple as::
     >>> import gaclient
     >>> session = gaclient.build_session(CLIENT_ID, CLIENT_SECRET,
         {'refresh_token': REFRESH_TOKEN})
-    >>> it = gaclient.ResponseIterator(session, PROFILE_ID,
+    >>> it = gaclient.Cursor(session, PROFILE_ID,
         '2012-01-01', '2012-01-01', ['visits'], ['date'])
     >>> list(it)
     [{'visits': 12345, 'date': datetime.date(2012, 1, 1)}]
