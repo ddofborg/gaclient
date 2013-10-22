@@ -1,65 +1,47 @@
+gaclient: analytics made easy
+=============================
 
-.. automodule:: gaclient
+Current release: 0.3.
 
-Google Analytics Client
-~~~~~~~~~~~~~~~~~~~~~~~
-Google Analytics Client is a wrapper for the google-api-python-client package
-to make using Google Analytics easier. The library automatically downloads
-more result pages if available, and converts string data into Python types.
+gaclient is a small library that implements an easy to use API
+for consuming Google Analytics APIs.
 
-The main interface is :ref:`GoogleAnalyticsClient`, the file `sample.py` contains
-a working example.
+Assuming you have already obtained a **refresh token** from the user, retrieving metrics is
+as simple as::
 
-Contents
+    >>> import gaclient
+    >>> session = gaclient.build_session(CLIENT_ID, CLIENT_SECRET, {'refresh_token': REFRESH_TOKEN})
+    >>> it = gaclient.ResponseIterator(session, PROFILE_ID, '2012-01-01', '2012-01-01', ['visits'], ['date'])
+    >>> list(it)
+    [{'visits': 12345, 'date': datetime.date(2012, 1, 1)}]
+
+For complete step-by-step guide on how to obtain a user's consent please refer to the :ref:`guide`.
+
+
+Features
 --------
-* :ref:`license`
-* :ref:`reference`
-    * :ref:`GoogleAnalyticsClient`
-    * :ref:`Request`
-    * :ref:`utilities`
 
-.. _license:
+    * Transparently queries Google Analytics for additional results
+      if any are available;
+    * Selecting any valid combination of dimensions and metrics;
+    * Server-side filtering;
+    * Server-side sorting;
+    * Data is returned in native Python types, parsed and ready for you consumption.
 
-License and Copyright
----------------------
-Copyright (C) 2013 Tiemo Kieft <t.kieft@gmail.com>
 
-Licensed under the Apache License, Version 2.0 (the "License");
-You may not use this module except in compliance with the License.
-You may obtain a copy of the License at
+User Guide
+----------
+.. toctree::
+   :maxdepth: 2
 
-      http://www.apache.org/licenses/LICENSE-2.0
+   guide
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 
-.. _reference:
+API Reference
+-------------
+.. toctree::
+   :maxdepth: 2
 
-Reference
----------
+   api
 
-.. _GoogleAnalyticsClient:
 
-GoogleAnalyticsClient
-_____________________
-
-.. autoclass:: GoogleAnalyticsClient
-    :members:
-
-.. _Request:
-
-Request
-_______
-
-.. autoclass:: Request
-    :members:
-
-.. _utilities:
-
-Utility Functions
-_________________
-
-.. autofunction:: gaclient.client.parse_date
