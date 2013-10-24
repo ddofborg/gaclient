@@ -15,7 +15,7 @@ as simple as::
     >>> list(it)
     [{'visits': 12345, 'date': datetime.date(2012, 1, 1)}]
 
-For complete step-by-step guide on how to obtain a user's consent please refer to the :ref:`guide`.
+For complete step-by-step guide on how to obtain a user's consent please refer to the :ref:`guide_link`.
 
 
 Features
@@ -28,6 +28,7 @@ Features
     * Server-side sorting;
     * Data is returned in native Python types, parsed and ready for you consumption.
 
+.. _guide_link:
 
 User Guide
 ----------
