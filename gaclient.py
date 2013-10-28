@@ -34,7 +34,7 @@
 '''
 
 __author__ = 'Tiemo Kieft'
-__version__ = '0.3b1'
+__version__ = '0.3b2'
 __license__ = 'Apache 2.0'
 
 import datetime
