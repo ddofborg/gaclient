@@ -65,6 +65,7 @@ In order to use the Google Analytics API your application needs to be
 registered in Google's Cloud Console, see :ref:`registration` for
 instructions on how to do that.
 
+
 OAuth 2.0
 ---------
 Google uses a system called OAuth 2.0 to authenticate and authorize
@@ -109,8 +110,8 @@ and that they are appropriately initialized:
   * REFRESH_TOKEN: The refresh token to use.
 
 
-Getting Started
----------------
+Downloading Data
+----------------
 In this section we are going to build a simple script to download some
 data from the user's Analytics profile. Let's start out with some
 boilerplate::
@@ -181,3 +182,22 @@ at most 30 rows of data from Google Analytics and print them on the screen.
 
 By turning on :ref:`logging` you can get some more insight into the
 requests that are executed.
+
+
+Error Handling
+--------------
+The :class:`Cursor` will make at most 5 attempts to download each
+part of the resultset. When a recoverable error occurs the cursor
+instance will delay for ``2^attempt + random``. This behaviour can
+be modified by supplying a `atempts` argument to the construction
+of the :class:`Cursor` instance.
+
+The default timeout that each HTTP request has is 60 seconds.
+If you wish to use a different timeout value then the easiest
+way is to monkey patch the session object's ``get`` method::
+
+    import functools
+
+    session.get = functools.partial(session.get, timeout=1)
+
+this will create a ``get`` method with a one second timeout.
