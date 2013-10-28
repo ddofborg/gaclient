@@ -14,7 +14,7 @@ user, retrieving metrics is as simple as::
 
 For complete step-by-step guide on how to obtain a user's
 consent please refer to the
-`User Guide <http://www.python-gaclient.org/doc/0.3/guide.html>`_.
+`User Guide <http://www.python-gaclient.org/0.3/guide.html>`_.
 
 
 Features
