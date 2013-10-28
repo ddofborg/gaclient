@@ -167,7 +167,12 @@ class Cursor (object):
 
         self.sampled = self.sampled or response['containsSampledData']
 
-        return [self._parse_row(row) for row in response['rows']]
+        if self._len == 0:
+            retval = []
+        else:
+            retval = [self._parse_row(row) for row in response['rows']]
+
+        return retval
 
 
     def _parse_row (self, row):
@@ -477,6 +482,7 @@ def generate_consent_url (client_id, redirect_uri, scope='read-only'):
 
     session = OAuth2Session(client_id, redirect_uri=redirect_uri,
         scope=scope_)
+
     authorization_url, state = session.authorization_url(
         'https://accounts.google.com/o/oauth2/auth',
         access_type="offline", approval_prompt="force")
