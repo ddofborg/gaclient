@@ -42,6 +42,11 @@ import functools
 import itertools
 import logging
 import sys
+import random
+import time
+
+from requests.exceptions import ConnectionError, Timeout
+from ssl import SSLError
 
 PY3 = (sys.version_info.major == 3)
 
@@ -109,7 +114,12 @@ class Cursor (object):
 
     :param session: An authorized OAuth2 session, see :func:`build_session`.
     :param \*args: Passed to :func:`build_data_query`.
-    :param \*\*kwargs: Passed to :func:`build_data_query`.
+    :param \*\*kwargs: Arguments that are not listed below are passed to
+                       :func:`build_data_query`.
+
+    Optional keyword arguments:
+        `attempts`: Each cursor will make at most `attempts` attempts to
+                    execute its requet. Defaults to 5.
     '''
 
     def __init__ (self, session, *args, **kwargs):
@@ -117,6 +127,14 @@ class Cursor (object):
 
         self.args = args
         self.kwargs = kwargs
+
+        self.attempts = kwargs.pop('attempts', 5)
+
+        assert self.attempts is None or self.attempts > 0
+
+        if self.attempts is None:
+            self.attempts = 1
+
         self.params = build_data_query(*args, **kwargs)
 
         self._next_link = u'{}?{}'.format(
@@ -151,7 +169,25 @@ class Cursor (object):
             is automatically called when iterating over the object.
         '''
         if self._len is None:
-            self._row_buffer = self._download_next_link()
+            for attempt in range(self.attempts):
+
+                try:
+                    self._row_buffer = self._download_next_link()
+
+                except (ConnectionError, Timeout, SSLError, ValueError) :
+                    if attempt == self.attempts - 1:
+                        raise
+
+                    delay = (2 ** attempt) + random.random()
+
+                    LOG.info('An error occured, retry in {} seconds'.format(
+                        delay))
+
+                    time.sleep(delay)
+
+                else:
+                    break
+
 
 
     def _download_next_link (self):
