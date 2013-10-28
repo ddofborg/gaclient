@@ -1,17 +1,28 @@
 
 from distutils.core import setup
 
-import gaclient
+import re
+
+
+def get_current_version ():
+    version = 'UNKNOWN'
+
+    with open('gaclient.py', 'r') as fp:
+        matches = re.search('__version__ = [\'"](.*)[\'"]\n', fp.read())
+        if matches:
+            version = matches.group(1)
+
+    return version
+
 
 setup(name='gaclient',
-    version=gaclient.__version__,
-    description='A easy to use interface to Google Analytics.',
-    long_description=gaclient.__doc__,
-    author=gaclient.__author__,
+    version=get_current_version(),
+    description='An easy to use interface to Google Analytics.',
+    long_description=open('README.rst', 'r').read(),
+    author='Tiemo Kieft',
     author_email='t.kieft@gmail.com',
     url='http://www.python-gaclient.org',
     license="Apache 2.0",
-    platform='any',
     classifiers = [
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: Apache Software License',
@@ -23,4 +34,4 @@ setup(name='gaclient',
     ],
     keywords = ('google analytics'),
     py_modules=['gaclient'],
-    install_requires=['requests', 'requests_oauthlib'])
+    install_requires=['requests_oauthlib>=0.4.0'])
