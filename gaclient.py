@@ -168,6 +168,16 @@ class Cursor (object):
         ''' Execute the request and store it's results. This method
             is automatically called when iterating over the object.
         '''
+
+        def wait (attempt):
+            delay = (2 ** attempt) + random.random()
+
+            LOG.info('An error occured, retry in {} seconds'.format(
+                delay))
+
+            time.sleep(delay)
+
+
         if self._len is None:
             for attempt in range(self.attempts):
 
@@ -178,16 +188,17 @@ class Cursor (object):
                     if attempt == self.attempts - 1:
                         raise
 
-                    delay = (2 ** attempt) + random.random()
+                    wait(attempt)
 
-                    LOG.info('An error occured, retry in {} seconds'.format(
-                        delay))
+                except AnalyticsError as ex:
+                    if not (500 <= ex.code < 600) or\
+                            attempt == self.attempts - 1:
+                        raise
 
-                    time.sleep(delay)
+                    wait(attempt)
 
                 else:
                     break
-
 
 
     def _download_next_link (self):
@@ -376,9 +387,10 @@ def execute_request (session, url):
 
     e = data.get('error')
     if e:
-        LOG.error('Analytics reported and error code={}, message={}.'.format(
+        LOG.error('Analytics reported an error: code={}, message={}.'.format(
             e.get('code'), e.get('message')))
-        raise AnalyticsError(e['code'], e['message'], e['errors'])
+
+        raise AnalyticsError(int(e['code']), e['message'], e['errors'])
 
     return data
 
