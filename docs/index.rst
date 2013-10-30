@@ -1,7 +1,7 @@
 gaclient: analytics made easy
 =============================
 
-Current release: 0.3.
+Current release: |version|, last update: |today|.
 
 gaclient is a small library that implements an easy to use API
 for consuming Google Analytics APIs.
