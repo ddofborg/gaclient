@@ -46,6 +46,7 @@ import random
 import time
 
 from requests.exceptions import ConnectionError, Timeout
+from oauthlib.oauth2.rfc6749 import errors as oauthlib_errors
 from ssl import SSLError
 
 PY3 = (sys.version_info.major == 3)
@@ -111,6 +112,22 @@ class AnalyticsError (Error):
 
     def __str__ (self):
         return 'code={}, message={}'.format(self.code, self.message)
+
+
+class InvalidGrantError (AnalyticsError):
+    ''' Raised when the galcient was unable to attain an access token
+        with the supplied refresh token.
+
+    There are generally two reasons for this error to occur:
+
+        1. Your server's clock is not in sync with NTP.
+        2. The refresh token limit has been exceeded.
+
+    For more information refer to `Core Reporting API - Authorization <https://developers.google.com/analytics/devguides/reporting/core/v2/gdataAuthentication#helpme>`_.
+    '''
+
+    def __init__ (self):
+        super(InvalidGrantError, self).__init__(400, 'invalid_grant', {})
 
 
 class Cursor (object):
@@ -511,7 +528,12 @@ def build_session (client_id, client_secret, token, update_token=None):
         token_updater=token_updater)
 
     if token.get('access_token') is None:
-        token = session.refresh_token(REFRESH_URL, **extra)
+        try:
+            token = session.refresh_token(REFRESH_URL, **extra)
+
+        except oauthlib_errors.InvalidGrantError:
+            raise InvalidGrantError()
+
         token_updater(token)
 
     return session
