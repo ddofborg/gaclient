@@ -130,6 +130,13 @@ class InvalidGrantError (AnalyticsError):
         super(InvalidGrantError, self).__init__(400, 'invalid_grant', {})
 
 
+class InvalidCredentials (AnalyticsError):
+    ''' Raised when a request failes due to invalid credentials. '''
+
+    def __init__ (self, message):
+        super(InvalidCredentials, self).__init__(401, message, {})
+
+
 class Cursor (object):
     ''' Wraps a single request against the Google Analytics data API.
 
@@ -408,10 +415,18 @@ def execute_request (session, url):
 
     e = data.get('error')
     if e:
-        LOG.error('Analytics reported an error: code={}, message={}.'.format(
-            e.get('code'), e.get('message')))
+        code = int(e['code'])
+        message = e['message']
+        errors = e['errors']
 
-        raise AnalyticsError(int(e['code']), e['message'], e['errors'])
+        LOG.error('Analytics reported an error: code={}, message={}.'.format(
+            code, message))
+
+        if code == 401:
+            raise InvalidCredentials(message)
+
+        else:
+            raise AnalyticsError(code, message, errors)
 
     return data
 
