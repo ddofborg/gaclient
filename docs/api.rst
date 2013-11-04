@@ -75,7 +75,8 @@ Exceptions and Errors
 .. autoclass:: InvalidResponse
 .. autoclass:: UnsupportedDataType
 .. autoclass:: AnalyticsError
-
+.. autoclass:: InvalidGrantError
+.. autoclass:: InvalidCredentials
 
 Utilities
 ---------
