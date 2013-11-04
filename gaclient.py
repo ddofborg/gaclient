@@ -109,6 +109,10 @@ class AnalyticsError (Error):
         self.errors = errors
 
 
+    def __str__ (self):
+        return 'code={}, message={}'.format(self.code, self.message)
+
+
 class Cursor (object):
     ''' Wraps a single request against the Google Analytics data API.
 
