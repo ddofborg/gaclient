@@ -26,7 +26,8 @@ Features
     * Server-side filtering;
     * Server-side sorting;
     * Data is returned in native Python types, parsed and
-      ready for you consumption.
+      ready for you consumption;
+    * Support for Python 3.
 
 
 For more information check out the `gaclient documentation <http://www.python-gaclient.org/latest>`_.
