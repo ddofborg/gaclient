@@ -181,13 +181,13 @@ class Cursor (object):
                     if type(e) == 'AnalyticsError' and e.reason != 'internalError':
                         raise
 
-                    if attempt == self.attempts - 1:
+                    if attempt == self.attempts:
                         raise
 
-                    delay = (2 ** attempt) + random.random()
+                    delay = (2 ** (attempt+random.random()))
 
                     LOG.info('An error occured, retry {} of {} in {} seconds'.format(
-                        attempt + 2, self.attempts, delay))
+                        attempt, self.attempts, delay))
 
                     time.sleep(delay)
 
