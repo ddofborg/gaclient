@@ -1,38 +1,35 @@
 # -*- coding: utf-8 -*-
 '''
-gaclient is a small library that implements an easy to use API
-for consuming Google Analytics APIs.
+    gaclient is a small library that implements an easy to use API
+    for consuming Google Analytics APIs.
 
-Assuming you have already obtained a **refresh token** from the
-user, retrieving metrics is as simple as::
+    Assuming you have already obtained a **refresh token** from the
+    user, retrieving metrics is as simple as::
 
-    >>> import gaclient
-    >>> session = gaclient.build_session(CLIENT_ID, CLIENT_SECRET,
-        {'refresh_token': REFRESH_TOKEN})
-    >>> it = gaclient.Cursor(session, PROFILE_ID,
-        '2012-01-01', '2012-01-01', ['visits'], ['date'])
-    >>> list(it)
-    [{'visits': 12345, 'date': datetime.date(2012, 1, 1)}]
+        >>> import gaclient
+        >>> session = gaclient.build_session(CLIENT_ID, CLIENT_SECRET,
+            {'refresh_token': REFRESH_TOKEN})
+        >>> it = gaclient.Cursor(session, PROFILE_ID,
+            '2012-01-01', '2012-01-01', ['visits'], ['date'])
+        >>> list(it)
+        [{'visits': 12345, 'date': datetime.date(2012, 1, 1)}]
 
-For complete step-by-step guide on how to obtain a user's
-consent please refer to the
-`User Guide <http://www.python-gaclient.org/0.3/guide.html>`_.
-
-
-Features
---------
-
-    * Transparently queries Google Analytics for additional results
-      if any are available;
-    * Selecting any valid combination of dimensions and metrics;
-    * Server-side filtering;
-    * Server-side sorting;
-    * Data is returned in native Python types, parsed and
-      ready for you consumption;
-    * Support for Python 3.
+    For complete step-by-step guide on how to obtain a user's
+    consent please refer to the
+    `User Guide <http://www.python-gaclient.org/0.3/guide.html>`_.
 
 
-For more information check out the `gaclient documentation <http://www.python-gaclient.org/latest>`_.
+    Features
+    --------
+
+        * Transparently queries Google Analytics for additional results
+          if any are available;
+        * Selecting any valid combination of dimensions and metrics;
+        * Server-side filtering;
+        * Server-side sorting;
+        * Data is returned in native Python types, parsed and
+          ready for you consumption.
+
 
 '''
 
@@ -49,7 +46,6 @@ import random
 import time
 
 from requests.exceptions import ConnectionError, Timeout
-from oauthlib.oauth2.rfc6749 import errors as oauthlib_errors
 from ssl import SSLError
 
 PY3 = (sys.version_info.major == 3)
@@ -112,32 +108,7 @@ class AnalyticsError (Error):
         self.message = message
         self.errors = errors
 
-
-    def __str__ (self):
-        return 'code={}, message={}'.format(self.code, self.message)
-
-
-class InvalidGrantError (AnalyticsError):
-    ''' Raised when the galcient was unable to attain an access token
-        with the supplied refresh token.
-
-    There are generally two reasons for this error to occur:
-
-        1. Your server's clock is not in sync with NTP.
-        2. The refresh token limit has been exceeded.
-
-    For more information refer to `Core Reporting API - Authorization <https://developers.google.com/analytics/devguides/reporting/core/v2/gdataAuthentication#helpme>`_.
-    '''
-
-    def __init__ (self):
-        super(InvalidGrantError, self).__init__(400, 'invalid_grant', {})
-
-
-class InvalidCredentials (AnalyticsError):
-    ''' Raised when a request failes due to invalid credentials. '''
-
-    def __init__ (self, message):
-        super(InvalidCredentials, self).__init__(401, message, {})
+        self.message = u"code={}, errors={}, msg={}".format(code,errors,message)
 
 
 class Cursor (object):
@@ -159,7 +130,7 @@ class Cursor (object):
         self.args = args
         self.kwargs = kwargs
 
-        self.attempts = kwargs.pop('attempts', 5)
+        self.attempts = kwargs.pop('attempts', 10)
 
         assert self.attempts is None or self.attempts > 0
 
@@ -199,43 +170,36 @@ class Cursor (object):
         ''' Execute the request and store it's results. This method
             is automatically called when iterating over the object.
         '''
-
-        def wait (attempt):
-            delay = (2 ** attempt) + random.random()
-
-            LOG.info('An error occured, retry in {} seconds'.format(
-                delay))
-
-            time.sleep(delay)
-
-
         if self._len is None:
             for attempt in range(self.attempts):
 
                 try:
                     self._row_buffer = self._download_next_link()
 
-                except (ConnectionError, Timeout, SSLError, ValueError) :
+                except (ConnectionError, Timeout, SSLError, ValueError, AnalyticsError) as e:
+
+                    if type(e) == 'AnalyticsError' and e.reason != 'internalError':
+                        raise
+
                     if attempt == self.attempts - 1:
                         raise
 
-                    wait(attempt)
+                    delay = (2 ** attempt) + random.random()
 
-                except AnalyticsError as ex:
-                    if not (500 <= ex.code < 600) or\
-                            attempt == self.attempts - 1:
-                        raise
+                    LOG.info('An error occured, retry {} of {} in {} seconds'.format(
+                        attempt + 2, self.attempts, delay))
 
-                    wait(attempt)
+                    time.sleep(delay)
 
                 else:
                     break
 
 
+
     def _download_next_link (self):
         LOG.info('Downloading data.')
         response = execute_request(self.session, self._next_link)
-        
+
         if not response['kind'] == 'analytics#gaData':
             raise InvalidResponse('Expected data response.')
 
@@ -265,7 +229,7 @@ class Cursor (object):
     def _parse_header (self, header):
         type_ = header['dataType']
         name = header['name']
-        
+
         try:
             parser = DATATYPES[type_]
         except KeyError:
@@ -353,7 +317,7 @@ def build_data_query (profile_id, start_date, end_date, metrics,
     assert filters is None or isinstance(filters, list)
     assert 0 < int(max_results) <= 10000
     assert int(start_index) > 0
-    
+
     profile_id = add_ga_prefix(profile_id)
     start_date = parse_date(start_date)
     end_date = parse_date(end_date)
@@ -418,18 +382,9 @@ def execute_request (session, url):
 
     e = data.get('error')
     if e:
-        code = int(e['code'])
-        message = e['message']
-        errors = e['errors']
-
-        LOG.error('Analytics reported an error: code={}, message={}.'.format(
-            code, message))
-
-        if code == 401:
-            raise InvalidCredentials(message)
-
-        else:
-            raise AnalyticsError(code, message, errors)
+        LOG.error('Analytics reported an error code={}, message="{}".'.format(
+            e.get('code'), e.get('message')))
+        raise AnalyticsError(e['code'], e['message'], e['errors'])
 
     return data
 
@@ -480,7 +435,7 @@ def add_ga_prefix (val_or_vals):
 def parse_date (date):
     ''' Parses a date and returns a :class:`datetime.date`.
 
-    :param date: A `str`, :class:`datetime.datetime` or 
+    :param date: A `str`, :class:`datetime.datetime` or
                  :class:`datetime.date`.
 
     :returns: A :class:`datetime.date` instance is returned.
@@ -546,12 +501,7 @@ def build_session (client_id, client_secret, token, update_token=None):
         token_updater=token_updater)
 
     if token.get('access_token') is None:
-        try:
-            token = session.refresh_token(REFRESH_URL, **extra)
-
-        except oauthlib_errors.InvalidGrantError:
-            raise InvalidGrantError()
-
+        token = session.refresh_token(REFRESH_URL, **extra)
         token_updater(token)
 
     return session
